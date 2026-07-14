@@ -127,19 +127,84 @@ void pinjamBuku() {
 // ============================================================================
 
 void kembalikanBuku() {
+    if (mahasiswaAktif == "") {
+        cout << "\n[Peringatan] Silakan panggil antrean loket terlebih dahulu sebelum melayani transaksi!\n";
+        return;
+    }
+    if (toLowerManual(keperluanAktif) != "kembali") {
+    cout << "\n[Peringatan] Mahasiswa ini mengambil antrean untuk peminjaman buku.\n";
+    return;
+	}
+    string id;
+    cout << "\n[Melayani: " << mahasiswaAktif << " - " << nimAktif << "]\nMasukkan ID Buku untuk dikembalikan: "; getline(cin, id);
+    NodeBuku* temp = headBuku;
 
+    while (temp != NULL) {
+        if (toLowerManual(temp->idBuku) == toLowerManual(id)) {
+            if (!temp->tersedia) {
+                int hari;
+                cout << "Berapa hari buku ini dipinjam? : "; cin >> hari; cin.ignore();
+                
+                temp->tersedia = true;
+                string infoDenda = "";
+                if (hari > 7) {
+                    int denda = (hari - 7) * 5000;
+                    totalDendaPerpus += denda; 
+                    
+                    infoDenda = " (Terlambat " + angkaKeStringManual(hari - 7) + " hari, Denda: Rp" + angkaKeStringManual(denda) + ")";
+                    cout << "\n[Denda] Anda terlambat! Total denda sebesar Rp" << denda << " dimasukkan ke Kas Perpus.\n";
+                }
+                
+                pushRiwayat(mahasiswaAktif + " (" + nimAktif + ") mengembalikan buku: " + temp->judul + infoDenda);
+                cout << "\n>> [Sukses] Buku \"" << temp->judul << "\" telah diterima kembali.\n";
+                mahasiswaAktif = ""; nimAktif = ""; keperluanAktif = "";
+            } else {
+                cout << "\n[Peringatan] Buku ini sudah ada di dalam rak perpustakaan.\n";
+            }
+            return;
+        }
+        temp = temp->next;
+    }
+    cout << "\n[Error] ID Buku tidak terdaftar.\n";
 }
 
 void lihatRiwayatTransaksi() {
-
+    cout << "\n==================================================\n";
+    cout << "        RIWAYAT TRANSAKSI TERBARU (STACK)          \n";
+    cout << "==================================================\n";
+    if (topStack == NULL) {
+        cout << " Belum ada riwayat transaksi sirkulasi buku.\n";
+        cout << "==================================================\n";
+        return;
+    }
+    NodeStack* temp = topStack;
+    int no = 1;
+    while (temp != NULL) {
+        cout << " [" << no++ << "] " << temp->infoTransaksi << "\n";
+        temp = temp->next;
+    }
+    cout << "==================================================\n";
 }
 
 void lihatLaporanKeuanganDenda() {
-
+    cout << "\n==================================================\n";
+    cout << "       LAPORAN KAS PENDAPATAN DENDA PERPUS        \n";
+    cout << "==================================================\n";
+    cout << " Total Dana Terkumpul: Rp" << totalDendaPerpus << "\n";
+    cout << " [Info] Seluruh dana denda akan dialokasikan untuk\n"; 
+    cout << "        perawatan dan restok buku perpustakaan.\n";
+    cout << "==================================================\n";
 }
 
-void hapusRiwayatTerbaru(){
-	
+void hapusRiwayatTerbaru() {
+    if (topStack == NULL) {
+        cout << "\n[Info] Riwayat transaksi sudah kosong.\n";
+        return;
+    }
+    NodeStack* temp = topStack;
+    topStack = topStack->next;
+    cout << "\n>> [Sukses] Riwayat: \"" << temp->infoTransaksi << "\" telah dihapus.\n";
+    delete temp;
 }
 
 
