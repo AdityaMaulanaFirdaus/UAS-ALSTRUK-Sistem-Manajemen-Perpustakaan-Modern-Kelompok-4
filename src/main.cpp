@@ -85,19 +85,106 @@ void cariBuku() {
 // ============================================================================
 
 void tambahBuku() {
+    string id;
+    cout << "\nMasukkan ID Buku Baru: "; getline(cin, id);
+    
+    NodeBuku* temp = headBuku;
+    while (temp != NULL) {
+        if (toLowerManual(temp->idBuku) == toLowerManual(id)) {
+            cout << "[Error] ID Buku '" << id << "' sudah terdaftar di sistem!\n";
+            return;
+        }
+        temp = temp->next;
+    }
 
+    string judul, pengarang;
+    cout << "Masukkan Judul Buku : "; getline(cin, judul);
+    cout << "Masukkan Pengarang  : "; getline(cin, pengarang); 
+    
+    sisipBuku(id, judul, pengarang, true);
+    cout << "\n>> [Sukses] Buku \"" << judul << "\" berhasil ditambahkan ke rak!\n";
 }
 
 void hapusBuku() {
+    
+    if (headBuku == NULL) {
+        cout << "\nPerpustakaan kosong, tidak ada buku untuk dihapus.\n";
+        return;
+    }
+    string id;
+    cout << "\nMasukkan ID Buku yang ingin dihapus: "; getline(cin, id);
+
+    NodeBuku* temp = headBuku;
+    NodeBuku* prev = NULL;
+
+    while (temp != NULL && toLowerManual(temp->idBuku) != toLowerManual(id)) {
+        prev = temp;
+        temp = temp->next; 
+    }
+
+    if (temp == NULL) {
+        cout << "\n[Info] Buku dengan ID '" << id << "' tidak ditemukan.\n";
+        return;
+    }
+    
+    if (!temp->tersedia) {
+    cout << "\n[Peringatan] Buku sedang dipinjam sehingga tidak dapat dihapus.\n";
+    return;
+	}
+
+    if (prev == NULL) { 
+        headBuku = headBuku->next;
+    } else {
+        prev->next = temp->next;
+    }
+    delete temp;
+    cout << "\n>> [Sukses] Buku dengan ID '" << id << "' berhasil dihapus.\n";
 
 }
 
 void urutkanBuku() {
+     if (headBuku == NULL || headBuku->next == NULL) return;
 
+    bool ditukar;
+    NodeBuku* ptr1;
+    NodeBuku* lptr = NULL; 
+
+    do {
+        ditukar = false;
+        ptr1 = headBuku;
+        NodeBuku* prev = NULL;
+
+        while (ptr1->next != lptr) {
+            if (toLowerManual(ptr1->judul) > toLowerManual(ptr1->next->judul)) {
+                NodeBuku* nextNode = ptr1->next;
+                
+                ptr1->next = nextNode->next;
+                nextNode->next = ptr1;
+
+                if (prev == NULL) {
+                    headBuku = nextNode; 
+                } else {
+                    prev->next = nextNode;
+                }
+
+                ditukar = true;
+                ptr1 = nextNode; 
+            }
+            prev = ptr1;
+            ptr1 = ptr1->next;
+        }
+        lptr = ptr1; 
+    } while (ditukar);
+
+    cout << "\n>> [Sukses] Seluruh koleksi buku berhasil diurutkan berdasarkan Judul Buku (A-Z) via Manipulasi Pointer!\n";
+    tampilkanSemuaBuku();
 }
 
 void pushRiwayat(string info) {
-
+    NodeStack* baru = new NodeStack;
+    baru->infoTransaksi = info;
+    baru->next = topStack;
+    topStack = baru;
 }
 
 
