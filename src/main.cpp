@@ -60,23 +60,102 @@ string angkaKeStringManual(int angka) {
 // ============================================================================
 
 void sisipBuku(string id, string judul, string pengarang, bool tersedia) {
+     NodeBuku* baru = new NodeBuku;
+    baru->idBuku = id; baru->judul = judul; baru->pengarang = pengarang; baru->tersedia = tersedia; baru->next = NULL;
 
+    if (headBuku == NULL) {
+        headBuku = baru;
+    } else {
+        NodeBuku* temp = headBuku;
+        while (temp->next != NULL) temp = temp->next;
+        temp->next = baru;
+    }
 }
 
 void loadDatabaseBuku() {
-
+    sisipBuku("B03", "Logika Informatika", "Chou", true);
+    sisipBuku("B01", "Struktur Data C++", "Sasa", true);
+    sisipBuku("B04", "Pengenalan Algoritma", "Budi", true);
+    sisipBuku("B02", "Dasar Pemrograman", "Martin", true);
+    sisipBuku("B05", "Pemrograman C++ Lanjut", "Sasa", true); 
 }
 
 void tampilkanSemuaBuku() {
-
+     cout << "\n==================================================\n";
+    cout << "            DAFTAR BUKU PERPUSTAKAAN              \n";
+    cout << "==================================================\n";
+    if (headBuku == NULL) {
+        cout << " Perpustakaan saat ini tidak memiliki koleksi buku.\n";
+        return;
+    }
+    
+    NodeBuku* temp = headBuku;
+    int total = 0, tersedia = 0, dipinjam = 0;
+    while (temp != NULL) {
+        cout << " ID: " << temp->idBuku 
+             << " | Judul: " << temp->judul 
+             << " | Pengarang: " << temp->pengarang 
+             << " | Status: " << (temp->tersedia ? "Tersedia" : "Dipinjam") << "\n";
+        if (temp->tersedia) tersedia++; else dipinjam++;
+        total++;
+        temp = temp->next;
+    }
+    cout << "--------------------------------------------------\n";
+    cout << " Total Buku: " << total << " | Tersedia: " << tersedia << " | Dipinjam: " << dipinjam << "\n";
+    cout << "==================================================\n";
 }
 
 void rekomendasiBuku(string idBukuAsli, string pengarangAsli, string judulAsli) {
+    NodeBuku* temp = headBuku;
+    bool adaRekomendasi = false;
+    
+    string pengarangLower = toLowerManual(pengarangAsli);
+    string kataKunciJudul = toLowerManual(judulAsli.substr(0, judulAsli.find(' ')));
 
+    cout << "\n>>> REKOMENDASI BUKU LAIN UNTUK ANDA <<<\n";
+    while (temp != NULL) {
+        if (temp->idBuku != idBukuAsli) {
+            string tempPengarangLower = toLowerManual(temp->pengarang);
+            string tempJudulLower = toLowerManual(temp->judul);
+            
+            if (tempPengarangLower == pengarangLower || tempJudulLower.find(kataKunciJudul) != string::npos) {
+                cout << " -> ID: " << temp->idBuku << " | Judul: " << temp->judul 
+                     << " (" << (temp->tersedia ? "Tersedia" : "Dipinjam") << ")\n";
+                adaRekomendasi = true;
+            }
+        }
+        temp = temp->next;
+    }
+    if (!adaRekomendasi) {
+        cout << " (Belum ada buku lain yang mirip dengan topik/pengarang ini)\n";
+    }
+    cout << "--------------------------------------------\n";
 }
 
 void cariBuku() {
+    string keyword;
+    cout << "\nMasukkan Judul atau ID Buku yang dicari: ";
+    getline(cin, keyword);
+    keyword = toLowerManual(keyword);
+    bool ketemu = false;
 
+    NodeBuku* temp = headBuku;
+    while (temp != NULL) {
+        string judulLower = toLowerManual(temp->judul);
+        string idLower = toLowerManual(temp->idBuku);
+        
+        if (judulLower.find(keyword) != string::npos || idLower == keyword) {
+            cout << "\n[Buku Ditemukan]\n";
+            cout << " -> ID: " << temp->idBuku << " | Judul: " << temp->judul << " | Pengarang: " << temp->pengarang << " | Status: " << (temp->tersedia ? "Tersedia" : "Dipinjam") << "\n";
+            ketemu = true;
+            
+            rekomendasiBuku(temp->idBuku, temp->pengarang, temp->judul);
+        }
+        temp = temp->next;
+    }
+    if (!ketemu) {
+        cout << "\n[Info] Buku dengan kata kunci tersebut tidak ditemukan.\n";
+    }
 }
 
 
